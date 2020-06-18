@@ -1,7 +1,7 @@
 {
-  "name": "rufus",
+  "name": "rufus-livereload",
   "version": "1.0.0",
-  "description": "",
+  "description": "Live reload your files in local repository with SharePoint folder",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +9,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "gulp": "^4.0.2"
+    "gulp-spsave": "^3.1.1"
+  },
+  "dependencies": {
+    "gulp": "^4.0.2",
+    "gulp-color": "0.0.2",
+    "gulp-spsync": "^1.5.9",
+    "gulp-spsync-creds": "^2.3.8",
+    "gulp-websocket-server": "^1.1.2",
+    "sppurge": "^2.2.0"
   }
 }
