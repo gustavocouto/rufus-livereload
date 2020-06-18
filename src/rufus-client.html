@@ -1,0 +1,50 @@
+<html>
+
+<head>
+    <script type="text/javascript">
+        let wss = {};
+        let socketUrl = '';
+        let lastMessage = '';
+        let connectedOnce = false;
+
+        function logMessage(message) {
+            if (message == lastMessage)
+                return;
+
+            lastMessage = message;
+            console.log(lastMessage);
+        }
+
+        function createConnection() {
+            wss = new WebSocket(socketUrl);
+
+            wss.addEventListener('open', e => {
+                if (connectedOnce)
+                    return window.location.reload(true);
+
+                connectedOnce = true;
+                logMessage('[Rufus livereload] Connection is open!');
+            });
+
+            wss.addEventListener('close', e => {
+                logMessage('[Rufus livereload] Connection is closed. Waiting for the socket to be alive...');
+                setTimeout(createConnection, 1000);
+            });
+
+            wss.addEventListener('message', e => {
+                document.getElementById('test').innerText = e.data;
+            });
+        }
+
+        socketUrl = `ws://localhost:4041/rufus-livereload?origin=${window.location.href}`;
+        createConnection();
+    </script>
+</head>
+
+<body>
+    <div id="test">
+
+    </div>
+</body>
+
+</html>
