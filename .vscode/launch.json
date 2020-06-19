@@ -2,12 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "GulpTester - Rufus",
+            "name": "GulpTester",
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/gulp/bin/gulp.js",
             "stopOnEntry": false,
-            "args": ["rufus"],
+            "args": ["serve"],
             "cwd": "${workspaceRoot}",
             "runtimeArgs": [
                 "--nolazy"

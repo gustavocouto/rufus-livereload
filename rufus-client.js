@@ -27,6 +27,11 @@
             logMessage('[Rufus livereload] Connection is closed. Waiting for the socket to be alive...');
             setTimeout(createConnection, 1000);
         });
+
+        wss.addEventListener('message', e => {
+            if(e.data == 'reload')
+                window.location.reload(true);
+        });
     }
 
     window['rufusLivereload'] = function(port) {
