@@ -33,7 +33,7 @@ exports.rufus = config => {
             if(request.url.toLowerCase() != '/rufus-client.js')
                 return;
 
-            fs.readFile('./rufus-client.js',  'utf8', (err, data) => {
+            fs.readFile(`${__dirname}/rufus-client.js`,  'utf8', (err, data) => {
                 const client = data.replace('${webSocketPort}', config.webSocketPort || 8081);
                 response.setHeader('Content-Type', 'text/javascript');
                 response.end(new Buffer(client, 'binary'));
