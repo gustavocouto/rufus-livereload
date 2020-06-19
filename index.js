@@ -2,7 +2,9 @@ const { Delete } = require('sppurge');
 const { spsave } = require('spsave');
 const recursive = require("recursive-readdir");
 const gulpWebsocketServer = require('gulp-websocket-server');
+const open = require('open');
 const fs = require('fs');
+const http = require('http');
 const nodePath = require('path');
 const colors = require('colors');
 const watch = require('node-watch');
@@ -26,6 +28,19 @@ exports.rufus = config => {
         return wss;
     }
 
+    const createStatisServer = () => new Promise(resolve => {
+        http.createServer((request, response) => {
+            if(request.url.toLowerCase() != '/rufus-client.js')
+                return;
+
+            fs.readFile('./rufus-client.js',  'utf8', (err, data) => {
+                const client = data.replace('${webSocketPort}', config.webSocketPort || 8081);
+                response.setHeader('Content-Type', 'text/javascript');
+                response.end(new Buffer(client, 'binary'));
+            });
+        }).listen(config.webStaticPort || 5051, resolve);
+    });
+
     const watchQueue = async () => {
         if (watchingQueue) return { mandatory: false };
 
@@ -40,7 +55,7 @@ exports.rufus = config => {
             }, credentials, {
                 glob: path,
                 folder: `${config.sharePointFolder}/${nodePath.dirname(path)}`
-            });
+            }).catch(() => {});
 
             log(`${path} uploaded`);
         }
@@ -74,31 +89,29 @@ exports.rufus = config => {
         log(`${path} deleted`);
     };
 
-    const sync = async () => {
-        log('Synchronizing SharePoint...');
-        await deletePath('', true);
-        await watchFolder(config.localPath);
-    };
-
-    const serve = () => new Promise(_ => {
-        const wss = createWebScoketServer();
-        watch('./src', { recursive: true }, async (e, path) => {
-            log(`Working for ${path} ${e} mode`);
-
-            if (e == 'update') {
-                const watchResult = await (isDir(path) ? watchFolder : watchFile)(path);
-                watchResult.mandatory && wss.send('reload');
-            } else if (e == 'remove') {
-                await deletePath(path);
-                wss.send('reload');
-            }
-        });
-
-        log(`Rufus is watching ${colors.cyan(config.localPath.cyan)} path, keep working!`);
-    });
-
     return {
-        sync,
-        serve
+        sync: async () => {
+            log('Synchronizing SharePoint...');
+            await deletePath('', true);
+            await watchFolder(config.localPath);
+        },
+        serve: () => new Promise(async _ => {
+            await createStatisServer();
+            const wss = createWebScoketServer();
+            watch('./src', { recursive: true }, async (e, path) => {
+                log(`Working for ${path} ${e} mode`);
+
+                if (e == 'update') {
+                    const watchResult = await (isDir(path) ? watchFolder : watchFile)(path);
+                    watchResult.mandatory && wss.send('reload');
+                } else if (e == 'remove') {
+                    await deletePath(path);
+                    wss.send('reload');
+                }
+            });
+
+            config.sharePointWorkingUrl && open(config.sharePointWorkingUrl);
+            log(`Rufus is watching ${colors.cyan(config.localPath.cyan)} path, keep working!`);
+        })
     };
 }
