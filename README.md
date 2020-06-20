@@ -21,7 +21,6 @@ async function sync(options) {
 
 async function serve(options) {
 	await rufus(options).serve();
-	//Note that serve is a promise that never resolve
 }
 
 async function syncThenServe(options) {
@@ -81,7 +80,7 @@ const rufusOptions = {
 	localPath: './src',
 	webStaticPort: 5051,
 	webSocketPort: 8081,
-	sharePointUrl: 'https://trentim.sharepoint.com/sites/subsite',
+	sharePointUrl: 'https://myurl.sharepoint.com/sites/subsite',
 	sharePointFolder: 'Shared Documents/Subfolder',
 	sharePointWorkingUrl: 'https://myurl.sharepoint.com/sites/subsite/Project%20Detail%20Pages/WorkflowStageStatus.aspx?ProjUid=1',
 	username: 'myusername@myemail.com',
