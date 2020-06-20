@@ -1,6 +1,6 @@
 {
   "name": "rufus-livereload",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Live reload your files in local repository with SharePoint folder",
   "main": "index.js",
   "scripts": {
