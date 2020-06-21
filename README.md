@@ -74,7 +74,7 @@ Username to login in SharePoint.
 - **password**&nbsp;&nbsp;`string` `required`
 Password to login in SharePoint. If you use two-step verification please visit [Using app passwords with apps that don't support two-step verification](https://support.microsoft.com/en-us/help/12409/microsoft-account-app-passwords-and-two-step-verification).
 
-Opions usage example:
+Options usage example:
 ```
 const rufusOptions = {
 	localPath: './src',
