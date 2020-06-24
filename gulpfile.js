@@ -1,6 +1,10 @@
 const { rufus } = require('./index');
 const config = require('./rufus.config.json');
 
+config.ignore = async (mode, path) => {
+    return false;
+};
+
 exports['sync'] = async function() {
     await rufus(config).sync();
 };

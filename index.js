@@ -30,7 +30,7 @@ exports.rufus = config => {
 
     const createStatisServer = () => new Promise(resolve => {
         http.createServer((request, response) => {
-            if(request.url.toLowerCase() != '/rufus-client.js')
+            if(request.url.toLowerCase())
                 return;
 
             fs.readFile(`${__dirname}/rufus-client.js`,  'utf8', (err, data) => {
@@ -89,6 +89,13 @@ exports.rufus = config => {
         log(`${path} deleted`);
     };
 
+    const canIgnore = async (mode, path) => {
+        if(!config.ignore)
+            return false;
+
+        return !!(await config.ignore(mode, path));
+    }
+
     return {
         sync: async () => {
             log('Synchronizing SharePoint...');
@@ -99,8 +106,10 @@ exports.rufus = config => {
             await createStatisServer();
             const wss = createWebScoketServer();
             watch('./src', { recursive: true }, async (e, path) => {
-                log(`Working for ${path} ${e} mode`);
+                if(await canIgnore(e, path))
+                    return;
 
+                log(`Working for ${path} ${e} mode`);
                 if (e == 'update') {
                     const watchResult = await (isDir(path) ? watchFolder : watchFile)(path);
                     watchResult.mandatory && wss.send('reload');
