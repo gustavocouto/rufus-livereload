@@ -30,7 +30,7 @@ exports.rufus = config => {
 
     const createStatisServer = () => new Promise(resolve => {
         http.createServer((request, response) => {
-            if(request.url.toLowerCase())
+            if(request.url.toLowerCase() != '/rufus-client.js')
                 return;
 
             fs.readFile(`${__dirname}/rufus-client.js`,  'utf8', (err, data) => {
@@ -89,13 +89,6 @@ exports.rufus = config => {
         log(`${path} deleted`);
     };
 
-    const canIgnore = async (mode, path) => {
-        if(!config.ignore)
-            return false;
-
-        return !!(await config.ignore(mode, path));
-    }
-
     return {
         sync: async () => {
             log('Synchronizing SharePoint...');
@@ -106,7 +99,7 @@ exports.rufus = config => {
             await createStatisServer();
             const wss = createWebScoketServer();
             watch('./src', { recursive: true }, async (e, path) => {
-                if(await canIgnore(e, path))
+                if(config.ignore && await config.ignore(e, path))
                     return;
 
                 log(`Working for ${path} ${e} mode`);
