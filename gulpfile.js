@@ -2,7 +2,7 @@ const { rufus } = require('./index');
 const config = require('./rufus.config.json');
 
 config.ignore = async (mode, path) => {
-    return false;
+    return true;
 };
 
 exports['sync'] = async function() {
@@ -17,4 +17,4 @@ exports['sync:serve'] = async function() {
     const context = rufus(config);
     await context.sync();
     await context.serve();
-}
+};

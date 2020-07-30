@@ -41,6 +41,15 @@ exports.rufus = config => {
         }).listen(config.webStaticPort || 5051, resolve);
     });
 
+    const canIgnore = async (mode, path) => {
+        if(!config.ignore)
+            return false;
+
+        const ignore = await config.ignore(mode, path);
+        ignore && log(`Ignoring ${path} path`);
+        return ignore;
+    };
+
     const watchQueue = async () => {
         if (watchingQueue) return { mandatory: false };
 
@@ -48,11 +57,11 @@ exports.rufus = config => {
         while (fileQueue.length != 0) {
             const path = fileQueue.pop();
             if (!fs.existsSync(path))
-                return;
+                continue;
+            if(await canIgnore('update', path))
+                continue;
 
-            await spsave({
-                siteUrl: config.sharePointUrl
-            }, credentials, {
+            await spsave({ siteUrl: config.sharePointUrl }, credentials, {
                 glob: path,
                 folder: `${config.sharePointFolder}/${nodePath.dirname(path)}`
             }).catch(() => {});
@@ -80,6 +89,9 @@ exports.rufus = config => {
     };
 
     const deletePath = async path => {
+        if(await canIgnore('remove', path))
+            return;
+
         const context = { ...credentials, siteUrl: config.sharePointUrl };
         if (isDir(path))
             await purge.deleteFolder(context, `${config.sharePointFolder}${path && '/'}${path}`).catch(() => { });
@@ -98,15 +110,15 @@ exports.rufus = config => {
         serve: () => new Promise(async _ => {
             await createStatisServer();
             const wss = createWebScoketServer();
-            watch('./src', { recursive: true }, async (e, path) => {
-                if(config.ignore && await config.ignore(e, path))
+            watch('./src', { recursive: true }, async (mode, path) => {
+                if(await canIgnore(mode, path))
                     return;
 
-                log(`Working for ${path} ${e} mode`);
-                if (e == 'update') {
+                log(`Working for ${path} ${mode} mode`);
+                if (mode == 'update') {
                     const watchResult = await (isDir(path) ? watchFolder : watchFile)(path);
                     watchResult.mandatory && wss.send('reload');
-                } else if (e == 'remove') {
+                } else if (mode == 'remove') {
                     await deletePath(path);
                     wss.send('reload');
                 }
