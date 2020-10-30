@@ -110,7 +110,7 @@ exports.rufus = config => {
         serve: () => new Promise(async _ => {
             await createStatisServer();
             const wss = createWebScoketServer();
-            watch('./src', { recursive: true }, async (mode, path) => {
+            watch(config.localPath || './src', { recursive: true }, async (mode, path) => {
                 if(await canIgnore(mode, path))
                     return;
 
